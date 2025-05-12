@@ -12,6 +12,10 @@ RED="${ESC}[31m"
 GREEN="${ESC}[32m"
 BLUE="${ESC}[34m"
 UNDERLINE="${ESC}[4m"
+
+# IMPORTS
+source "${SCRIPT_DIR}/lib/readFileToArray.sh"
+
 # static
 declare -r MOUNT_POINT="/tmp/mount_borg"
 declare -A FILES=(
@@ -22,46 +26,6 @@ function info() {
   # produces a message like
   # Mon Oct  7 21:45:27 UTC 2024 Pruning repository
   printf "\n%s %s\n\n" "$(date)" "$*" >&2
-}
-
-function readFileToArray() {
-    local -n result=${1} # array
-    local file=${2}
-    local lines=()
-    local lines
-    local ignoreComments=true
-    local feedback=${CONFIG[feedback]}
-    local funcName=${FUNCNAME[0]}
-
-    if [[ ${feedback} == true ]]; then
-      echo "${GREY}--- ${funcName}()${RESET}"
-    fi
-
-    # Check if the file exists
-    if [[ ! -f "${file}" ]]; then
-        echo "Error: File not found: ${file}"
-        return 1
-    fi
-
-    # Read the file line by line and append to the array
-    while IFS= read -r line; do
-      if [[ ${ignoreComments} == true ]] && [[ "${line}" == \#* ]]; then
-        continue
-      else
-        lines+=("${line}")  # Append the line to the array
-      fi
-    done < "${file}"
-
-    if [[ ${#lines[@]} -gt 0 ]]; then
-        if [[ ${feedback} == true ]]; then
-          echo "Found ${#lines[@]} lines"
-        fi
-        result=("${lines[@]}") # assign
-        return 0
-    else
-        echo "Error: File empty? ${file}"
-        return 1
-    fi
 }
 
 function selectPathToRepos() {
@@ -389,7 +353,6 @@ function selectArchiv() {
         fi
     done
   fi
-
 }
 
 function main() {
