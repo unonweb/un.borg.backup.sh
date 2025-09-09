@@ -127,6 +127,9 @@ function setBackupCmd() {
     ;;
   common)
     _cmd="backupCommon"
+    ;;  
+  machines)
+     _cmd="backupMachines"
     ;;
   *)
     echo "Unknown option: ${_repoName}"
@@ -257,6 +260,32 @@ function backupCommon() {
   backup_exit=$?
 }
 
+function backupMachines() {
+  # requires BORG_REPO to be set
+  local _backupPath="/var/lib/machines"
+  local _pathRepo=${1}
+
+  if [[ -z ${_pathRepo} ]]; then
+    echo "_pathRepo is empty: ${_pathRepo}"
+    exit 1
+  fi
+
+  echo "Starting to backup ${_backupPath}"
+
+  borg create "${_pathRepo}"::'{hostname}-{now}' ${_backupPath} \
+    --progress \
+    --verbose \
+    --filter AME \
+    --list \
+    --stats \
+    --lock-wait 600 \
+    --compression lz4 \
+    --exclude-caches \
+    --exclude '.Trash-1000'
+
+  backup_exit=${?}
+}
+
 function backupHome() {
 
   local _backupPath="/home/${USER}"
@@ -308,7 +337,7 @@ function mountArchive() {
   fi
 
   # Mount the chosen archive
-  _cmd="borg mount ${_pathRepo}::${_nameArchive} ${_mountPoint}"
+  _cmd="borg mount ${_pathRepo}::${_nameArchive} ${_mountPoint} -o allow_other"
   echo "Mounting archive with cmd:"
   echo "${GREEN}${_cmd}${RESET}"
   ${_cmd}
@@ -406,7 +435,7 @@ function main() {
     read -p ">> "
     echo
 
-    case $REPLY in
+    case ${REPLY} in
     1)
       # Backup
       setBackupCmd cmdBackup ${nameRepo}
