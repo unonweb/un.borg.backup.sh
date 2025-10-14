@@ -4,7 +4,7 @@ function readFileToArray() { # array ${file}
     local lines=()
     local lines
     local ignoreComments=true
-    local feedback=true
+    local feedback=false
     local funcName=${FUNCNAME[0]}
 
     if [[ ${feedback} == true ]]; then
