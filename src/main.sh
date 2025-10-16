@@ -4,6 +4,8 @@
 export SCRIPT_PATH="$(readlink -f "${BASH_SOURCE}")"
 export SCRIPT_DIR=$(dirname -- "$(readlink -f "${BASH_SOURCE}")")
 export SCRIPT_NAME=$(basename -- "$(readlink -f "${BASH_SOURCE}")")
+export SCRIPT_PARENT=$(dirname "${SCRIPT_DIR}")
+
 # formatting
 export ESC=$(printf "\e")
 export BOLD="${ESC}[1m"
@@ -325,7 +327,7 @@ function main {
     # globals static
     MOUNT_POINT="/tmp/mount_borg"
 	PATH_BACKUP_SCRIPTS="${SCRIPT_DIR}/run"
-	PATH_CONFIG="${SCRIPT_DIR}/config.cfg"
+	PATH_CONFIG="${SCRIPT_PARENT}/config.cfg"
 	
     # globals dynamic
 	declare -A CONFIG
