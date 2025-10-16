@@ -15,16 +15,15 @@ export UNDERLINE="${ESC}[4m"
 export CYAN="\e[36m"
 
 # IMPORTS
-source "${SCRIPT_DIR}/lib/readFileToArray.sh"
+source "${SCRIPT_DIR}/lib/readFileToMap.sh"
 
 function selectPathToRepos() {
 	# Sets:
 	# - PATH_TO_REPOS
 	
 	local _REQUIRED=(
-		PATH_BORG_REPOS_TXT
+		REPO_PATHS_ARRAY
 	)
-	local _REPO_PATHS_ARRAY=()
 	local _PATH=""
     
 	# check required vars
@@ -35,10 +34,7 @@ function selectPathToRepos() {
         fi
     done
 
-	# set REPO_PATHS_ARRAY
-	readFileToArray _REPO_PATHS_ARRAY ${PATH_BORG_REPOS_TXT}
-
-	if [[ ${#_REPO_PATHS_ARRAY[@]} -eq 0 ]]; then
+	if [[ ${#REPO_PATHS_ARRAY[@]} -eq 0 ]]; then
 		echo "No repository paths given!"
 		return 1
 	fi
@@ -46,7 +42,7 @@ function selectPathToRepos() {
 	# select
 	echo "---"
 	echo -e "${BOLD}"Select path to repositories"${RESET}"
-	select _PATH in "${_REPO_PATHS_ARRAY[@]}"; do
+	select _PATH in "${REPO_PATHS_ARRAY[@]}"; do
 		if [[ -z "${_PATH}" ]]; then
 			echo "Invalid selection, please try again."
 			continue
@@ -133,7 +129,7 @@ function selectBorgArchive {
 	)
 	local _ARCHIVES
 	local _ARCHIVES_ARRAY=()
-	local item
+	local _item
 
 	# check required
     for var in "${_REQUIRED[@]}"  ; do
@@ -154,10 +150,10 @@ function selectBorgArchive {
 		echo "${BOLD}Available archives:"
 		_ARCHIVES_ARRAY=($_ARCHIVES)
 		
-		select item in "${_ARCHIVES_ARRAY[@]}"; do
-			if [ -n "${item}" ]; then
-				echo "Archive selected: ${item}"
-				ARCHIVE_NAME="${item}"
+		select _item in "${_ARCHIVES_ARRAY[@]}"; do
+			if [ -n "${_item}" ]; then
+				echo "Archive selected: ${_item}"
+				ARCHIVE_NAME="${_item}"
 				break # return
 			else
 				echo "Invalid selection. Please choose a valid archive."
@@ -328,15 +324,17 @@ function main {
     # globals static
     MOUNT_POINT="/tmp/mount_borg"
 	PATH_BACKUP_SCRIPTS="${SCRIPT_DIR}/run"
-	PATH_BORG_REPOS_TXT="${SCRIPT_DIR}/borg_repo_paths.txt"
+	PATH_CONFIG="${SCRIPT_DIR}/config.cfg"
+	
     # globals dynamic
+	declare -A CONFIG
     BORG_REPO="" # path of selected repo
     REPO_NAME="" # name of selected repo
     PATH_TO_REPOS="" # path to all repos
-    
+	REPO_PATHS_ARRAY=()
     ARCHIVE_NAME=""
-	
 	BACKUP_SCRIPT=""
+
     # local
 	local _OPTIONS_1=(
 		"Init new repo"
@@ -352,7 +350,11 @@ function main {
 		"Info"
 		"Change repo"
     )
-    
+
+	# CONFIG
+	readFileToMap CONFIG ${PATH_CONFIG}
+    REPO_PATHS_ARRAY=(${CONFIG[REPO_PATHS]})
+
 	# MENU 1
 	select opt in "${_OPTIONS_1[@]}"; do
 		if [[ -z "${opt}" ]]; then echo "ERROR: invalid option. Try again."
