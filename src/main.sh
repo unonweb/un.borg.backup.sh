@@ -189,7 +189,7 @@ function borgBackup {
         common)
             BACKUP_SCRIPT="${PATH_BACKUP_SCRIPTS}/borg.backup.common.sh"
             ;;  
-        machines)
+        machines*)
             BACKUP_SCRIPT="${PATH_BACKUP_SCRIPTS}/borg.backup.machines.sh"
             ;;
     esac
@@ -225,8 +225,9 @@ function borgBackup {
     fi
 
     # print fs capacity
+	echo
     df --human-readable --print-type "${BORG_REPO}"
-    echo ""
+    echo
     
     # get user confirmation
     while true; do
