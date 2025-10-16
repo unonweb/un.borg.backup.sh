@@ -1,3 +1,2 @@
-main/borg_repo_paths.txt
-src/borg_repo_paths.txt
+src/config.cfg
 systemd/run.sh.j2
