@@ -21,7 +21,7 @@ function borgBackupMachines {
 	
 	echo "Starting to backup ${_PATH_BACKUP}"
 
-	borg create "${BORG_REPO}"::'{hostname}-{now}' ${_PATH_BACKUP} \
+	sudo borg create "${BORG_REPO}"::'{hostname}-{now}' ${_PATH_BACKUP} \
 		--progress \
 		--verbose \
 		--filter AME \
